@@ -3,14 +3,15 @@
 tput clear
 
 col=$(tput cols)
-menuText="1. vis PID 2. dræp en PID 3. 4. pc info 5. services 6. søg efter file 7. bruger/grupper info"
+menuText="1. vis PID 2. dræp en PID 3. pc info 4. pc info 5. services 6. søg efter file 7. bruger/grupper info"
 
 displayNav() {
     textLength=${#menuText}
-    halfCol=$(( (col - textLength) / 2 ))
+    #maybe try this again later
+    #halfCol=$(( (col - textLength) / 2 ))
     tput cup 0 0
     printf '%*s\n' "$col" '' | tr ' ' '-'  # Top border
-    tput cup 1 $half_col
+    tput cup 1 0
     echo "$menuText"
     tput cup 2 0
     printf '%*s\n' "$col" '' | tr ' ' '-'  # Bottom border
@@ -25,36 +26,53 @@ displayPID(){
     echo "============================="
     echo "Total number of processes: $(ps -e | wc -l)"
     echo "============================="
-    echo "Press any key to continue..."
+    echo "tryk på en tast for at fortsætte..."
     read -n 1
-    tput clear
 }
 
 killAPID(){
-    echo "Enter the PID of the process you want to kill:"
+    echo "skrive et PID nummer for at dræbe den process:"
     read -r pid
-    echo "Are you sure you want to kill PID: $pid (y/n)?"
+    echo "Er du sikker på at du ville dræbe PID : $pid (y/n)?"
     read -r confirm
     if [ "$confirm" == "y" ]; then
         if kill $pid > /dev/null 2>/dev/null; then
-            echo "Process $pid has been killed."
+            echo "Process $pid er blevet dræbt."
         else
-            echo "Failed to kill process $pid."
+            echo "Process $pid kunne ikke dræbes."
         fi
     else
-        echo "no action taken"
+        echo "dræbning af processen er blevet annulleret."
     fi
     echo "============================="
-    echo "Press any key to continue..."
+    echo "tryk på en tast for at fortsætte..."
     read -n 1
-    tput clear
+}
+
+displayPCInfo(){
+    echo "PC Information:"
+    echo -e "\n=== CPU Information ===\n"
+    echo "CPU model: $(lscpu | grep 'Model name:' | awk -F ':' '{print $2}' | xargs)"
+
+    echo -e "\n=== Memory Information ===\n"
+    total_ram=$(free -h | grep 'Mem:' | awk '{print $2}')
+    used_ram=$(free -h | grep 'Mem:' | awk '{print $3}')
+	echo "Total Ram: $total_ram"
+	echo "Used Ram: $used_ram"
+    echo -e "\n=== Disk Information === \n"
+	disk_space=$(df -h --output=avail / | tail -n 1)
+	echo "Available disk space: $disk_space"
+
+    echo "============================="
+    echo "tryk på en tast for at fortsætte..."
+    read -n 1
 }
 
 displayContent() {
      case $1 in
         1) displayPID ;;
         2) killAPID ;;
-        3) echo "PC info...";;
+        3) displayPCInfo;;
         4) echo "Showing services...";;
         5) echo "Søger efter fil...";;
         6) echo "Bruger/grupper info...";;
@@ -63,6 +81,7 @@ displayContent() {
 }
 
 while true; do
+    tput clear
     displayNav
     tput cup 4 0
     echo "Vælg en mulighed (eller 'q' for at afslutte):"
