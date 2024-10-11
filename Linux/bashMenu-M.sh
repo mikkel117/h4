@@ -3,7 +3,7 @@
 tput clear
 
 col=$(tput cols)
-menuText="1. vis PID 2. dræp en PID 3. pc info 4. pc info 5. services 6. søg efter file 7. bruger/grupper info"
+menuText="1. vis PID 2. dræp en PID 3. pc info 4. services 5. søg efter file 6. bruger/grupper info"
 
 displayNav() {
     textLength=${#menuText}
